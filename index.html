@@ -1,0 +1,214 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapbox Legend Example</title>
+    <!-- Load Tailwind CSS for styling the container -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Set Inter as the default font */
+        :root {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Map Container takes up the whole screen */
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Adjust the search bar styling to fit nicely */
+        .mapboxgl-ctrl-geocoder {
+            min-width: 200px; /* Ensure search bar is wide enough */
+        }
+        /* Make sure the legend is still above the map controls */
+        .legend {
+            /* Positioning: Top right corner, ensuring it's above the map */
+            position: absolute;
+            top: 20px;
+            right: 20px; 
+            z-index: 10; 
+
+            /* Appearance */
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Soft shadow */
+            padding: 12px 15px;
+            line-height: 1.4em;
+            width: 180px;
+            font-size: 14px;
+        }
+
+        /* Legend Title */
+        .legend h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 6px;
+        }
+
+        /* Style for each legend item (row) */
+        .legend > div {
+            display: flex; /* Aligns color box and text */
+            align-items: center;
+            margin-bottom: 6px;
+            color: #444;
+            cursor: pointer; /* Show that items are clickable */
+            user-select: none; /* Prevents text selection on click */
+            transition: opacity 0.2s;
+        }
+
+        /* Style for the colored square (span) */
+        .legend span {
+            display: inline-block;
+            width: 14px; 
+            height: 14px; 
+            margin-right: 10px; 
+            border-radius: 3px; /* Match container rounding */
+            border: 1px solid rgba(0, 0, 0, 0.1); 
+            flex-shrink: 0; /* Prevents box from shrinking */
+            transition: border-color 0.2s;
+        }
+        
+        /* Style for when a layer is hidden (optional: visually cue the user) */
+        .legend .inactive {
+            opacity: 0.5; /* Fade out the text */
+            text-decoration: line-through;
+        }
+
+        /* Style the colored box when inactive */
+        .legend .inactive span {
+            border-color: #f00; /* Change border color to red */
+        }
+    </style>
+    <!-- Mapbox GL JS and CSS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet" />
+    
+    <!-- Mapbox Geocoder CSS (Required for search bar styling) -->
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+</head>
+<body class="p-0 m-0 overflow-hidden">
+
+    <!-- 1. The Map Container -->
+    <div id="map"></div>
+
+    <!-- 2. The Legend Container (Now using the correct Mapbox Layer IDs for layer toggling) -->
+    <div id='map-legend' class='legend'>
+        <h4>Data Categories (Click to Toggle)</h4>
+        
+        <!-- Item 1: Roadmarker (Layer ID: kelwona-roadmarker-668ibx) -->
+        <div data-layer='kelwona-roadmarker-668ibx' id='legend-item-1'>
+            <span style='background-color: #ff00ff;'></span>
+            Roadmarker
+        </div>
+        <!-- Item 2: Road Edges (Layer ID: kelwona-roadedges-4rk5js) -->
+        <div data-layer='kelwona-roadedges-4rk5js' id='legend-item-2'>
+            <span style='background-color: #ff0000;'></span>
+            Road Edges
+        </div>
+        <!-- Item 3: Curbcut Point (Layer ID: kelwona-curbut-point-39mieg) -->
+        <div data-layer='kelwona-curbut-point-39mieg' id='legend-item-3'>
+            <span style='background-color: #00ffff;'></span>
+            Curbcut Point
+        </div>
+        <!-- Item 4: Crosswalk (pavement) (Layer ID: kelwona-crosswalk-polygonized-cd17r5) -->
+        <div data-layer='kelwona-crosswalk-polygonized-cd17r5' id='legend-item-4'>
+            <span style='background-color: #ffc000;'></span>
+            Crosswalk (pavement)
+        </div>
+        <!-- Item 5: Bike Lane (Layer ID: bikelane-kelwona-868vou) -->
+        <div data-layer='bikelane-kelwona-868vou' id='legend-item-5'>
+            <span style='background-color: #ffff00;'></span>
+            Bike Lane
+        </div>
+        <!-- Item 6: Parkline (parking space) (Layer ID: kelwona-parkline-1eecc3) -->
+        <div data-layer='kelwona-parkline-1eecc3' id='legend-item-6'>
+            <span style='background-color: #00ff00;'></span>
+            Parkline (parking space)
+        </div>
+        <!-- Item 7: Sidewalk (pavement) (Layer ID: kelwona-sidewalk-polygonized-3il8t7) -->
+        <div data-layer='kelwona-sidewalk-polygonized-3il8t7' id='legend-item-7'>
+            <span style='background-color: #0000ff;'></span>
+            Sidewalk (pavement)
+        </div>
+    </div>
+
+    <!-- 3. Mapbox Initialization Script -->
+    <!-- Mapbox Geocoder JS (Must load before initialization script) -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+    
+    <script>
+        // Set your Mapbox access token
+        const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoicHJvamVjdGNlbnRyZSIsImEiOiJja3o4OW9zYmowM3YwMm9tcWF0MTRtc3VyIn0.ns_jCyc8s6t6CS1w8SK6QQ';
+        mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+
+        // Initialize the map with the new center coordinates and zoom level
+        const map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/projectcentre/cmhutfp2z008h01s64n6whp44', // Your custom style URL
+            // STARTING POSITION: [-119.479001, 49.885229]
+            center: [-119.479001, 49.885229], 
+            zoom: 14 // Increased zoom for a closer initial view
+        });
+
+        // 1. Initialize the Geocoder (Search Bar) control
+        const geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+
+        // 2. Add the Geocoder to the map (top-left corner)
+        map.addControl(geocoder, 'top-left');
+
+
+        // Add optional navigation control for better user experience
+        map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+        // Optional: Error handling
+        map.on('error', (e) => {
+             console.error('Mapbox Error:', e.error);
+        });
+
+        // --- NEW LOGIC FOR TOGGLING LAYERS ---
+
+        // Wait for the map to finish loading its style and data before trying to access layers
+        map.on('load', () => {
+            const legend = document.getElementById('map-legend');
+            const legendItems = legend.getElementsByTagName('div');
+
+            // Iterate through all legend items
+            for (const item of legendItems) {
+                // Get the Mapbox Layer ID from the 'data-layer' attribute
+                const layerId = item.getAttribute('data-layer');
+                
+                // Add click listener to each item
+                item.onclick = function (e) {
+                    // Check the current visibility of the layer
+                    const visibility = map.getLayoutProperty(layerId, 'visibility');
+                    
+                    if (visibility === 'visible') {
+                        // If it is visible, hide it
+                        map.setLayoutProperty(layerId, 'visibility', 'none');
+                        // Add inactive class to visually show it's hidden
+                        item.classList.add('inactive');
+                    } else {
+                        // If it is hidden (or undefined), show it
+                        map.setLayoutProperty(layerId, 'visibility', 'visible');
+                        // Remove inactive class
+                        item.classList.remove('inactive');
+                    }
+                };
+
+                // Remove the old placeholder error check, as we now have the correct IDs.
+                // You can now click on any item in the legend to toggle the map layer!
+            }
+        });
+
+    </script>
+</body>
+</html>
