@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geomate Example (Kelwona and San Jose)</title>
+    <title>Geomate example - Kelwona and San Jose</title>
     <!-- Load Tailwind CSS for styling the container -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -22,22 +22,29 @@
         .mapboxgl-ctrl-geocoder {
             min-width: 200px; /* Ensure search bar is wide enough */
         }
-        /* Make sure the legend is still above the map controls */
-        .legend {
-            /* Positioning: Top right corner, ensuring it's above the map */
+        
+        /* NEW: Container for Legend and Toggle Button */
+        #map-controls-container {
             position: absolute;
             top: 20px;
             right: 20px; 
             z-index: 10; 
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* To align the button and legend */
+        }
 
+        /* Legend Styling (Modified for container placement) */
+        .legend {
             /* Appearance */
             background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
             border-radius: 8px; /* Rounded corners */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Soft shadow */
             padding: 12px 15px;
             line-height: 1.4em;
-            width: 180px;
+            width: 210px; /* Increased width to accommodate longer names */
             font-size: 14px;
+            margin-bottom: 10px; /* Space between legend and button */
         }
 
         /* Legend Title */
@@ -74,7 +81,7 @@
             transition: border-color 0.2s;
         }
         
-        /* Style for when a layer is hidden (optional: visually cue the user) */
+        /* Style for when a layer is hidden (visually cue the user) */
         .legend .inactive {
             opacity: 0.5; /* Fade out the text */
             text-decoration: line-through;
@@ -83,6 +90,25 @@
         /* Style the colored box when inactive */
         .legend .inactive span {
             border-color: #f00; /* Change border color to red */
+        }
+
+        /* Styling for the toggle button */
+        .map-toggle-button {
+            background-color: #3b82f6; /* Blue background */
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s;
+            width: 210px; /* Match legend width */
+            text-align: center;
+        }
+        .map-toggle-button:hover {
+            background-color: #2563eb;
         }
     </style>
     <!-- Mapbox GL JS and CSS -->
@@ -97,45 +123,52 @@
     <!-- 1. The Map Container -->
     <div id="map"></div>
 
-    <!-- 2. The Legend Container (Now using the correct Mapbox Layer IDs for layer toggling) -->
-    <div id='map-legend' class='legend'>
-        <h4>Data Categories (Click to Toggle)</h4>
-        
-        <!-- Item 1: Roadmarker (Layer ID: kelwona-roadmarker-668ibx) -->
-        <div data-layer='kelwona-roadmarker-668ibx' id='legend-item-1'>
-            <span style='background-color: #ff00ff;'></span>
-            Roadmarker
+    <!-- 2. Legend and Control Container -->
+    <div id='map-controls-container'>
+        <!-- Legend Container -->
+        <div id='map-legend' class='legend'>
+            <h4>Data Categories (Click to Toggle)</h4>
+            
+            <!-- Layer IDs provided by the user are used here -->
+            <!-- Item 1: Roadmarker (Layer ID: kelwona-roadmarker-668ibx) -->
+            <div data-layer='kelwona-roadmarker-668ibx' id='legend-item-1'>
+                <span style='background-color: #ff00ff;'></span>
+                Roadmarker
+            </div>
+            <!-- Item 2: Road Edges (Layer ID: kelwona-roadedges-4rk5js) -->
+            <div data-layer='kelwona-roadedges-4rk5js' id='legend-item-2'>
+                <span style='background-color: #ff0000;'></span>
+                Road Edges
+            </div>
+            <!-- Item 3: Curbcut Point (Layer ID: kelwona-curbut-point-39mieg) -->
+            <div data-layer='kelwona-curbut-point-39mieg' id='legend-item-3'>
+                <span style='background-color: #00ffff;'></span>
+                Curbcut Point
+            </div>
+            <!-- Item 4: Crosswalk (pavement) (Layer ID: kelwona-crosswalk-polygonized-cd17r5) -->
+            <div data-layer='kelwona-crosswalk-polygonized-cd17r5' id='legend-item-4'>
+                <span style='background-color: #ffc000;'></span>
+                Crosswalk (pavement)
+            </div>
+            <!-- Item 5: Bike Lane (Layer ID: bikelane-kelwona-868vou) -->
+            <div data-layer='bikelane-kelwona-868vou' id='legend-item-5'>
+                <span style='background-color: #ffff00;'></span>
+                Bike Lane
+            </div>
+            <!-- Item 6: Parkline (parking space) (Layer ID: kelwona-parkline-1eecc3) -->
+            <div data-layer='kelwona-parkline-1eecc3' id='legend-item-6'>
+                <span style='background-color: #00ff00;'></span>
+                Parkline (parking space)
+            </div>
+            <!-- Item 7: Sidewalk (pavement) (Layer ID: kelwona-sidewalk-polygonized-3il8t7) -->
+            <div data-layer='kelwona-sidewalk-polygonized-3il8t7' id='legend-item-7'>
+                <span style='background-color: #0000ff;'></span>
+                Sidewalk (pavement)
+            </div>
         </div>
-        <!-- Item 2: Road Edges (Layer ID: kelwona-roadedges-4rk5js) -->
-        <div data-layer='kelwona-roadedges-4rk5js' id='legend-item-2'>
-            <span style='background-color: #ff0000;'></span>
-            Road Edges
-        </div>
-        <!-- Item 3: Curbcut Point (Layer ID: kelwona-curbut-point-39mieg) -->
-        <div data-layer='kelwona-curbut-point-39mieg' id='legend-item-3'>
-            <span style='background-color: #00ffff;'></span>
-            Curbcut Point
-        </div>
-        <!-- Item 4: Crosswalk (pavement) (Layer ID: kelwona-crosswalk-polygonized-cd17r5) -->
-        <div data-layer='kelwona-crosswalk-polygonized-cd17r5' id='legend-item-4'>
-            <span style='background-color: #ffc000;'></span>
-            Crosswalk (pavement)
-        </div>
-        <!-- Item 5: Bike Lane (Layer ID: bikelane-kelwona-868vou) -->
-        <div data-layer='bikelane-kelwona-868vou' id='legend-item-5'>
-            <span style='background-color: #ffff00;'></span>
-            Bike Lane
-        </div>
-        <!-- Item 6: Parkline (parking space) (Layer ID: kelwona-parkline-1eecc3) -->
-        <div data-layer='kelwona-parkline-1eecc3' id='legend-item-6'>
-            <span style='background-color: #00ff00;'></span>
-            Parkline (parking space)
-        </div>
-        <!-- Item 7: Sidewalk (pavement) (Layer ID: kelwona-sidewalk-polygonized-3il8t7) -->
-        <div data-layer='kelwona-sidewalk-polygonized-3il8t7' id='legend-item-7'>
-            <span style='background-color: #0000ff;'></span>
-            Sidewalk (pavement)
-        </div>
+
+        <!-- Satellite Toggle Button -->
+        <button id="satellite-toggle-button" class="map-toggle-button">Show Satellite View</button>
     </div>
 
     <!-- 3. Mapbox Initialization Script -->
@@ -143,73 +176,143 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
     
     <script>
-        // Set your Mapbox access token
+        // Define map style URLs and token
+        const STREETS_STYLE = 'mapbox://styles/projectcentre/cmhutfp2z008h01s64n6whp44';
         const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoicHJvamVjdGNlbnRyZSIsImEiOiJja3o4OW9zYmowM3YwMm9tcWF0MTRtc3VyIn0.ns_jCyc8s6t6CS1w8SK6QQ';
         mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
-        // Initialize the map with the new center coordinates and zoom level
+        // List of Mapbox base layers to hide/show during satellite toggle (to clean up the view)
+        const BASE_MAP_LAYER_PREFIXES = [
+            'background', 'water', 'road', 'tunnel', 'bridge', 'rail', 'airport', 'building', 'land', 'transit'
+        ];
+        
+        let isSatellite = false; // Initial state is streets/data
+
+        // Initialize the map with the custom streets/data style
         const map = new mapboxgl.Map({
             container: 'map', // container ID
-            style: 'mapbox://styles/projectcentre/cmhutfp2z008h01s64n6whp44', // Your custom style URL
-            // STARTING POSITION: [-119.479001, 49.885229]
+            style: STREETS_STYLE, 
             center: [-119.479001, 49.885229], 
-            zoom: 14 // Increased zoom for a closer initial view
+            zoom: 14 
         });
 
-        // 1. Initialize the Geocoder (Search Bar) control
-        const geocoder = new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl
+        // Get references to elements
+        const legendElement = document.getElementById('map-legend');
+        const toggleButton = document.getElementById('satellite-toggle-button');
+        
+        // --- Layer Toggling Logic for the Legend ---
+        function toggleLayerVisibility(layerId) {
+            const visibility = map.getLayoutProperty(layerId, 'visibility');
+            const item = document.querySelector(`[data-layer='${layerId}']`);
+
+            if (visibility === 'visible') {
+                map.setLayoutProperty(layerId, 'visibility', 'none');
+                if (item) item.classList.add('inactive');
+            } else {
+                map.setLayoutProperty(layerId, 'visibility', 'visible');
+                if (item) item.classList.remove('inactive');
+            }
+        }
+
+        function setupLegendToggles() {
+            const legendItems = legendElement.getElementsByTagName('div');
+
+            for (const item of legendItems) {
+                const layerId = item.getAttribute('data-layer');
+                
+                if (layerId) {
+                    item.onclick = () => toggleLayerVisibility(layerId);
+                }
+            }
+        }
+        
+        // --- Satellite Toggling Logic ---
+        function toggleSatelliteView() {
+            if (!isSatellite) {
+                // SWITCH TO SATELLITE VIEW
+                
+                // 1. Add the satellite base layer if it doesn't exist
+                if (!map.getSource('mapbox-satellite-source')) {
+                    map.addSource('mapbox-satellite-source', {
+                        'type': 'raster',
+                        'url': 'mapbox://mapbox.satellite',
+                        'tileSize': 256
+                    });
+                    
+                    // Place the satellite layer right at the bottom (first layer)
+                    map.addLayer({
+                        'id': 'mapbox-satellite-layer',
+                        'type': 'raster',
+                        'source': 'mapbox-satellite-source',
+                    }, map.getStyle().layers[0].id); // Insert before the very first layer
+                } else {
+                    // If it exists, just ensure it's visible
+                    map.setLayoutProperty('mapbox-satellite-layer', 'visibility', 'visible');
+                }
+
+                // 2. Hide base map layers to clean up the satellite view
+                map.getStyle().layers.forEach(layer => {
+                    // Check if the layer ID matches any of our base map prefixes
+                    const isBaseMapLayer = BASE_MAP_LAYER_PREFIXES.some(prefix => layer.id.startsWith(prefix));
+                    
+                    if (isBaseMapLayer) {
+                        map.setLayoutProperty(layer.id, 'visibility', 'none');
+                    }
+                });
+                
+                toggleButton.textContent = 'Show Data View';
+                isSatellite = true;
+
+            } else {
+                // SWITCH BACK TO STREETS/DATA VIEW
+
+                // 1. Hide the satellite layer
+                if (map.getLayer('mapbox-satellite-layer')) {
+                    map.setLayoutProperty('mapbox-satellite-layer', 'visibility', 'none');
+                }
+
+                // 2. Restore visibility of base map layers
+                map.getStyle().layers.forEach(layer => {
+                    const isBaseMapLayer = BASE_MAP_LAYER_PREFIXES.some(prefix => layer.id.startsWith(prefix));
+
+                    if (isBaseMapLayer) {
+                        map.setLayoutProperty(layer.id, 'visibility', 'visible');
+                    }
+                });
+
+                toggleButton.textContent = 'Show Satellite View';
+                isSatellite = false;
+            }
+        }
+
+        // --- Map Load Setup ---
+        map.on('load', () => {
+            // Geocoder (Search Bar) control
+            const geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl,
+                marker: {
+                    color: 'orange'
+                }
+            });
+            map.addControl(geocoder, 'top-left');
+
+            // Navigation control
+            map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+            // Initial setup of legend toggles
+            setupLegendToggles();
+            
+            // Link button to the toggle function
+            toggleButton.addEventListener('click', toggleSatelliteView);
         });
-
-        // 2. Add the Geocoder to the map (top-left corner)
-        map.addControl(geocoder, 'top-left');
-
-
-        // Add optional navigation control for better user experience
-        map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
         // Optional: Error handling
         map.on('error', (e) => {
              console.error('Mapbox Error:', e.error);
         });
 
-        // --- NEW LOGIC FOR TOGGLING LAYERS ---
-
-        // Wait for the map to finish loading its style and data before trying to access layers
-        map.on('load', () => {
-            const legend = document.getElementById('map-legend');
-            const legendItems = legend.getElementsByTagName('div');
-
-            // Iterate through all legend items
-            for (const item of legendItems) {
-                // Get the Mapbox Layer ID from the 'data-layer' attribute
-                const layerId = item.getAttribute('data-layer');
-                
-                // Add click listener to each item
-                item.onclick = function (e) {
-                    // Check the current visibility of the layer
-                    const visibility = map.getLayoutProperty(layerId, 'visibility');
-                    
-                    if (visibility === 'visible') {
-                        // If it is visible, hide it
-                        map.setLayoutProperty(layerId, 'visibility', 'none');
-                        // Add inactive class to visually show it's hidden
-                        item.classList.add('inactive');
-                    } else {
-                        // If it is hidden (or undefined), show it
-                        map.setLayoutProperty(layerId, 'visibility', 'visible');
-                        // Remove inactive class
-                        item.classList.remove('inactive');
-                    }
-                };
-
-                // Remove the old placeholder error check, as we now have the correct IDs.
-                // You can now click on any item in the legend to toggle the map layer!
-            }
-        });
-
     </script>
 </body>
-
 </html>
+
